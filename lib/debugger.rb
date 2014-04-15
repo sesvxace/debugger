@@ -1,5 +1,5 @@
 #--
-# Debugger v1.0 by Solistra
+# Debugger v1.1 by Solistra
 # =============================================================================
 # 
 # Summary
@@ -187,7 +187,7 @@ module SES
     end
     
     # Register this script with the SES Core.
-    Description = Script.new(:Debugger, 1.0, :Solistra)
+    Description = Script.new(:Debugger, 1.1, :Solistra)
     Register.enter(Description)
   end
 end

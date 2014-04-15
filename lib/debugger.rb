@@ -1,9 +1,9 @@
 #--
 # Debugger v1.0 by Solistra
-# ==============================================================================
+# =============================================================================
 # 
 # Summary
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #   This script provides a simple debugger with break point functionality using
 # the SES Tracer and SES Console. Essentially, you establish a series of break
 # points on specific lines within scripts in the Ace Script Editor -- when the
@@ -12,26 +12,26 @@
 # scripter's tool.
 # 
 # Usage
-# ------------------------------------------------------------------------------
-#   The debugger may be started by pressing F6 (by default -- this is able to be
-# configured in the configuration area) or by explicitly starting it through the
-# SES Console or a script call:
+# -----------------------------------------------------------------------------
+#   The debugger may be started by pressing F6 (by default -- this is able to
+# be configured in the configuration area) or by explicitly starting it through 
+# the SES Console or a script call:
 # 
 #     SES::Debugger.start
 # 
 #   Once the debugger has started, it will trace Ruby code execution until one
 # of the configured break points has been encountered. Once a break point is
 # reached, execution is halted and control is handed to you through the SES
-# Console. See the documentation for the SES Console script for more information
-# about the console itself.
+# Console. See the documentation for the SES Console script for more detailed
+# information about the console itself.
 # 
-#   You may stop the debugger at any time while it is running by simply entering
-# the following either through the SES Console or a script call:
+#   You may stop the debugger at any time while it is running by entering the
+# following either through the SES Console or a script call:
 # 
 #     SES::Debugger.stop
 # 
 #   Break points are stored as a hash in the SES::Debugger module (aptly named
-# "@breakpoints"). The instance variable storing the hash is defined as a reader
+# "@breakpoints"). The instance variable storing the hash is also a reader
 # method for the module, allowing you to dynamically add, remove, or modify the
 # breakpoints during game execution. Break points are defined within the hash
 # with the file name of the script as the key and an array of line numbers to
@@ -42,8 +42,8 @@
 # things (depending on when we need the break point set): we can either include
 # the break point in the configuration area of the script, or we can set the
 # point dynamically at some point during the game's execution (either through
-# a REPL -- such as the console -- or a script call). The following demonstrates
-# both methods:
+# a REPL -- such as the console -- or a script call). The following examples
+# demonstrate both methods:
 # 
 #     # Configuration area.
 #     @breakpoints = {
@@ -53,31 +53,32 @@
 #     # Dynamically adding the break point.
 #     SES::Debugger.breakpoints['Scene_Base'] = [40]
 # 
-#   If we then decide that we need to break whenever Scene_Base performs a basic
-# update, we can either add line 46 to the configuration area or add it during
-# runtime like so:
+#   If we then decide that we need to break whenever Scene_Base performs a
+# basic update, we can either add line 46 to the configuration area or add it
+# during runtime like so:
 # 
 #     SES::Debugger.breakpoints['Scene_Base'].push(46)
 # 
 # License
-# ------------------------------------------------------------------------------
-#   This script is made available under the terms of the MIT Expat license. View
-# [this page](http://sesvxace.wordpress.com/license/) for more information.
+# -----------------------------------------------------------------------------
+#   This script is made available under the terms of the MIT Expat license.
+# View [this page](http://sesvxace.wordpress.com/license/) for more detailed
+# information.
 # 
 # Installation
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #   This script requires the SES Core (v2.0), Tracer (v1.2), and Console (v1.0)
 # scripts in order to function. All of these scripts may be found at the
 # [SES VX Ace](http://sesvxace.wordpress.com/category/script-release) site.
 # 
 #   Place this script below Materials, but above Main. Place this script below
-# the SES Core, SES Console, and SES Tracer, but above all other custom scripts.
+# the SES Core, SES Console, and SES Tracer, but above other custom scripts.
 # 
 #++
 module SES
-  # ============================================================================
+  # ===========================================================================
   # Debugger
-  # ============================================================================
+  # ===========================================================================
   # Defines operation of the SES Debugger.
   module Debugger
     class << self
@@ -87,11 +88,10 @@ module SES
       
     # Ensure that we have the minimum script requirements.
     Register.require(:Console => 1.0, :Tracer => 1.2)
-    # ==========================================================================
+    # =========================================================================
     # BEGIN CONFIGURATION
-    # ==========================================================================
-    # The Input module constant to use for enabling the debugger. Constants that
-    # refer to the function keys are recommended ('Input::F5' - 'Input::F9').
+    # =========================================================================
+    # The Input module constant to use for enabling the debugger.
     TRIGGER = Input::F6
     
     # The number of lines of code to surround break point reports with. This
@@ -105,11 +105,10 @@ module SES
     #       'Scene_Base' => [40, 46],
     #       'Scene_Map' => [60],
     #     }
-    @breakpoints = { 'Scene_Base' => [40, 46], 'Scene_Map' => [60] }
-    
-    # ==========================================================================
+    @breakpoints = {}
+    # =========================================================================
     # END CONFIGURATION
-    # ==========================================================================
+    # =========================================================================
     # Stores the entire text of the scripts present in the Ace Script Editor.
     # These scripts are normally stored as compressed data, so we have to
     # decompress the data in order to have access to the uncompressed text.
@@ -120,8 +119,9 @@ module SES
     # Tracing lambda given to 'Kernel.set_trace_func' to perform debugging
     # operations (namely break points). When a break point is encountered, the
     # game stops execution and opens the SES Console with the active class at
-    # the time as the context. Once the SES Console has been exited, the context
-    # is reset to the context held before the break point was encountered.
+    # the time as the context. Once the SES Console has been exited, the
+    # context is reset to the context held before the break point was
+    # encountered.
     Lambda = ->(event, file, line, id, binding, class_name) do
       # Store the file number as an integer. This is used a little further into
       # the method to extract the code surrounding a break point.
@@ -191,9 +191,9 @@ module SES
     Register.enter(Description)
   end
 end
-# ==============================================================================
+# =============================================================================
 # Scene_Base
-# ==============================================================================
+# =============================================================================
 class Scene_Base
   # Only update the SES Debugger if the game is being run in test mode and the
   # console window is shown.

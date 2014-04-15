@@ -113,7 +113,7 @@ module SES
     # These scripts are normally stored as compressed data, so we have to
     # decompress the data in order to have access to the uncompressed text.
     @scripts = load_data('Data/Scripts.rvdata2').map! do |script|
-      Zlib::Inflate.inflate(script.last)
+      Zlib::Inflate.inflate(script.last).force_encoding("utf-8")
     end
     
     # Tracing lambda given to 'Kernel.set_trace_func' to perform debugging

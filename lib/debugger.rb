@@ -1,15 +1,18 @@
 #--
-# Debugger v1.1 by Solistra
+# Debugger v1.2 by Solistra
 # =============================================================================
 # 
 # Summary
 # -----------------------------------------------------------------------------
 #   This script provides a simple debugger with break point functionality using
-# the SES Tracer and SES Console. Essentially, you establish a series of break
-# points on specific lines within scripts in the Ace Script Editor -- when the
-# line is encountered, execution stops and the SES Console is opened with the
-# active class at the time of the break as the context. This is primarily a
-# scripter's tool.
+# the SES Console. Essentially, you establish a series of break points on
+# specific lines within scripts in the Ace Script Editor -- when the line is
+# encountered, execution stops and the SES Console is opened with the active
+# class at the time of the break as the context. This is primarily a scripter's
+# tool.
+# 
+#   **NOTE:** This script's reliance on the SES Tracer (v1.2) has been removed
+# as of version 1.2 of the SES Debugger.
 # 
 # Usage
 # -----------------------------------------------------------------------------
@@ -67,27 +70,31 @@
 # 
 # Installation
 # -----------------------------------------------------------------------------
-#   This script requires the SES Core (v2.0), Tracer (v1.2), and Console (v1.0)
-# scripts in order to function. All of these scripts may be found at the
-# [SES VX Ace](http://sesvxace.wordpress.com/category/script-release) site.
+#   This script requires the SES Core (v2.0) and SES Console (v1.0) scripts in
+# order to function. Both of these scripts may be found in the SES source
+# repository at the following locations:
+# 
+# * [Core](https://raw.github.com/sesvxace/core/master/lib/core.rb)
+# * [Console](https://raw.github.com/sesvxace/console/master/lib/console.rb)
 # 
 #   Place this script below Materials, but above Main. Place this script below
-# the SES Core, SES Console, and SES Tracer, but above other custom scripts.
+# the SES Core and SES Console, but above other custom scripts.
 # 
 #++
 module SES
   # ===========================================================================
   # Debugger
   # ===========================================================================
-  # Defines operation of the SES Debugger.
+  # Provides a simple debugger with break points, halting of game execution,
+  # and contextual awareness.
   module Debugger
     class << self
       attr_accessor :code_lines
-      attr_reader   :breakpoints, :scripts
+      attr_reader   :breakpoints
     end
       
     # Ensure that we have the minimum script requirements.
-    Register.require(:Console => 1.0, :Tracer => 1.2)
+    Register.require(:Core => 2.0, :Console => 1.0)
     # =========================================================================
     # BEGIN CONFIGURATION
     # =========================================================================
@@ -109,13 +116,6 @@ module SES
     # =========================================================================
     # END CONFIGURATION
     # =========================================================================
-    # Stores the entire text of the scripts present in the Ace Script Editor.
-    # These scripts are normally stored as compressed data, so we have to
-    # decompress the data in order to have access to the uncompressed text.
-    @scripts = load_data('Data/Scripts.rvdata2').map! do |script|
-      Zlib::Inflate.inflate(script.last).force_encoding("utf-8")
-    end
-    
     # Tracing lambda given to 'Kernel.set_trace_func' to perform debugging
     # operations (namely break points). When a break point is encountered, the
     # game stops execution and opens the SES Console with the active class at
@@ -123,25 +123,27 @@ module SES
     # context is reset to the context held before the break point was
     # encountered.
     Lambda = ->(event, file, line, id, binding, class_name) do
+      # Help mitigate lag by only focusing on the events needed.
+      Kernel.set_trace_func(nil) if @breakpoints.empty?
+      return unless ['call', 'c-call'].any? { |type| event == type }
       # Store the file number as an integer. This is used a little further into
       # the method to extract the code surrounding a break point.
       file_number = file.dup[1..4].to_i
       # Replace the useless information VX Ace gives us for file names with the
       # names of scripts as defined in the Script Editor.
-      file.gsub!(/^{\d+}/, SES::Tracer.scripts[$1.to_i]) if file =~ /^{(\d+)}/
+      file.gsub!(/^{\d+}/, $RGSS_SCRIPTS[$1.to_i][1]) if file =~ /^{(\d+)}/
       return unless @breakpoints[file]
       if @breakpoints[file].include?(line)
-        # Store the object in operation during the break point. This is used to
-        # provide a useful context to the SES Console.
+        # Grab the object which called the code the break point is set for.
         context = eval('self', binding)
         puts "**  BREAK: #{file}, line #{line} (#{context_string(context)}) **"
-        puts "**   LINE: \n#{script_line(file_number, line)}"
-        # Store the previous SES Console context so we can restore it later.
+        puts "**   CODE: \n#{script_line(file_number, line)}"
+        # Store the previous REPL context and set up the console environment.
         previous_context = SES::Console.context
         SES::Console.context, SES::Console.enabled = context, true
+        # Open the console; this halts the game loop until the REPL is exited.
         SES::Console.open
-        # Debugging session for this break point is finished, restore context
-        # for the SES Console.
+        # Debugging work is done, reset the context of the console.
         puts "** RETURN: Reset context to #{previous_context} **"
         SES::Console.context = previous_context
       end
@@ -155,39 +157,46 @@ module SES
       if (context.class == Class || context.class == Module)
         context.name
       else
-        "#{context.class.name} 0x#{(context.object_id << 1).to_s(16)}"
+        # Using `__id__` rather than `object_id` in order to account for the
+        # possibiity of a `BasicObject` instance being the context. Same for
+        # the `rescue nil` -- `BasicObject` has no `class` method.
+        "#{context.class.name rescue nil} 0x#{(context.__id__ << 1).to_s(16)}"
       end
     end
     
     # Generates a stub of code from the given script number. Includes the given
     # line number surrounded by the given number of surrounding lines.
-    def self.script_line(script, line, surrounding = @code_lines)
-      string, script = '', @scripts[script].split("\r\n")
-      surrounding.times do |i|
-        # Obtain the lines of code directly above the given line.
-        string << script[(line - 1) - (surrounding - i)] << "\n"
-      end
-      string << "#{script[line - 1]} <--- ** BREAK POINT **\n"
-      # Obtain the lines of code directly below the given line.
-      surrounding.times { |i| string << script[(line) + i] << "\n" }
-      string
+    def self.script_line(script, line, wrap = @code_lines)
+      line  -= 1
+      # Grab the script's code, convert it to UTF-8 in case of an alternative
+      # encoding, then split it into an array to allow the text to be wrapped.
+      script = $RGSS_SCRIPTS[script].last.force_encoding('utf-8').split("\r\n")
+      # Determine the starting and stopping points of the code excerpt, taking
+      # low and high limits into account.
+      start  = (line - wrap < 0 ? 0 : line - wrap)
+      stop   = (line + wrap > script.size ? script.size - line : line + wrap)
+      script[start..stop].map!.with_index do |l, i|
+        # Append the notice only if this line is, in fact, the break point.
+        script[line] == l ? l << " <--- ** BREAK POINT **" : l
+      end.join("\r\n")
     end
     
-    # Starts the SES Tracer with Debugger::Lambda as the tracing block to run.
+    # Calls `Kernel.set_trace_func` with `SES::Debugger::Lambda` as the tracing
+    # block to run.
     def self.start
-      SES::Tracer.start(Lambda)
+      Kernel.set_trace_func(Lambda)
     end
     
-    # Closes the SES Console, defers to the SES Tracer's +stop+ method, then
+    # Closes the SES Console, stops all `Kernel.set_trace_func` tracing, then
     # focuses the RGSS Player.
     def self.stop
       SES::Console.enabled = false
-      SES::Tracer.stop
+      Kernel.set_trace_func(nil)
       Win32.focus(Win32::HWND::Game)
     end
     
     # Register this script with the SES Core.
-    Description = Script.new(:Debugger, 1.1, :Solistra)
+    Description = Script.new(:Debugger, 1.2, :Solistra)
     Register.enter(Description)
   end
 end
@@ -204,7 +213,7 @@ class Scene_Base
       ses_debugger_sb_upd(*args, &block)
     end
     
-    # Start the SES Debugger if the configured Input key is triggered.
+    # Start the SES Debugger if the configured `Input` key is triggered.
     def update_ses_debugger
       SES::Debugger.start if Input.trigger?(SES::Debugger::TRIGGER)
     end

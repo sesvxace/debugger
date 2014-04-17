@@ -1,15 +1,18 @@
 
-Debugger v1.1 by Solistra
+Debugger v1.2 by Solistra
 =============================================================================
 
 Summary
 -----------------------------------------------------------------------------
   This script provides a simple debugger with break point functionality using
-the SES Tracer and SES Console. Essentially, you establish a series of break
-points on specific lines within scripts in the Ace Script Editor -- when the
-line is encountered, execution stops and the SES Console is opened with the
-active class at the time of the break as the context. This is primarily a
-scripter's tool.
+the SES Console. Essentially, you establish a series of break points on
+specific lines within scripts in the Ace Script Editor -- when the line is
+encountered, execution stops and the SES Console is opened with the active
+class at the time of the break as the context. This is primarily a scripter's
+tool.
+
+  **NOTE:** This script's reliance on the SES Tracer (v1.2) has been removed
+as of version 1.2 of the SES Debugger.
 
 Usage
 -----------------------------------------------------------------------------
@@ -67,10 +70,13 @@ information.
 
 Installation
 -----------------------------------------------------------------------------
-  This script requires the SES Core (v2.0), Tracer (v1.2), and Console (v1.0)
-scripts in order to function. All of these scripts may be found at the
-[SES VX Ace](http://sesvxace.wordpress.com/category/script-release) site.
+  This script requires the SES Core (v2.0) and SES Console (v1.0) scripts in
+order to function. Both of these scripts may be found in the SES source
+repository at the following locations:
+
+* [Core](https://raw.github.com/sesvxace/core/master/lib/core.rb)
+* [Console](https://raw.github.com/sesvxace/console/master/lib/console.rb)
 
   Place this script below Materials, but above Main. Place this script below
-the SES Core, SES Console, and SES Tracer, but above other custom scripts.
+the SES Core and SES Console, but above other custom scripts.
 

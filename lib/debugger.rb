@@ -11,9 +11,6 @@
 # class at the time of the break as the context. This is primarily a scripter's
 # tool.
 # 
-#   **NOTE:** This script's reliance on the SES Tracer (v1.2) has been removed
-# as of version 1.2 of the SES Debugger.
-# 
 # Usage
 # -----------------------------------------------------------------------------
 #   The debugger may be started by pressing F6 (by default -- this is able to

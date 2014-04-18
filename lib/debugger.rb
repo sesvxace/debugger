@@ -121,7 +121,6 @@ module SES
     # encountered.
     Lambda = ->(event, file, line, id, binding, class_name) do
       # Help mitigate lag by only focusing on the events needed.
-      Kernel.set_trace_func(nil) if @breakpoints.empty?
       return unless ['call', 'c-call'].any? { |type| event == type }
       # Store the file number as an integer. This is used a little further into
       # the method to extract the code surrounding a break point.
@@ -162,7 +161,8 @@ module SES
     end
     
     # Generates a stub of code from the given script number. Includes the given
-    # line number surrounded by the given number of surrounding lines.
+    # line number surrounded by the given number of surrounding lines. Returns
+    # a string of the code stub with a notice for the line of the break point.
     def self.script_line(script, line, wrap = @code_lines)
       line  -= 1
       # Grab the script's code, convert it to UTF-8 in case of an alternative
@@ -171,25 +171,27 @@ module SES
       # Determine the starting and stopping points of the code excerpt, taking
       # low and high limits into account.
       start  = (line - wrap < 0 ? 0 : line - wrap)
-      stop   = (line + wrap > script.size ? script.size - line : line + wrap)
-      script[start..stop].map!.with_index do |l, i|
-        # Append the notice only if this line is, in fact, the break point.
-        script[line] == l ? l << " <--- ** BREAK POINT **" : l
-      end.join("\r\n")
+      stop   = (line + wrap > script.size ? script.size - 1 : line + wrap)
+      script[line] << " <--- ** BREAK POINT **"
+      script[start..stop].join("\r\n")
     end
     
     # Calls `Kernel.set_trace_func` with `SES::Debugger::Lambda` as the tracing
-    # block to run.
+    # block to run. Returns `true` if started, `false` otherwise.
     def self.start
+      return false if @breakpoints.empty?
       Kernel.set_trace_func(Lambda)
+      true
     end
     
     # Closes the SES Console, stops all `Kernel.set_trace_func` tracing, then
-    # focuses the RGSS Player.
+    # focuses on the RGSS Player. Returns `true` if stopped, `false` otherwise.
     def self.stop
-      SES::Console.enabled = false
       Kernel.set_trace_func(nil)
-      Win32.focus(Win32::HWND::Game)
+      Win32.focus(Win32::HWND::Game) unless SES::Console.enabled
+      true
+    rescue
+      false
     end
     
     # Register this script with the SES Core.

@@ -74,7 +74,7 @@
 # * [Core](https://raw.github.com/sesvxace/core/master/lib/core.rb)
 # * [Console](https://raw.github.com/sesvxace/console/master/lib/console.rb)
 # 
-#   Place this script below Materials, but above Main. Place this script below
+# Place this script below Materials, but above Main. Place this script below
 # the SES Core and SES Console, but above other custom scripts.
 # 
 #++

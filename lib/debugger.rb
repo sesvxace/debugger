@@ -1,5 +1,5 @@
 #--
-# Debugger v1.2 by Solistra
+# Debugger v1.3 by Solistra
 # =============================================================================
 # 
 # Summary
@@ -67,7 +67,7 @@
 # 
 # Installation
 # -----------------------------------------------------------------------------
-#   This script requires the SES Core (v2.0) and SES Console (v1.0) scripts in
+#   This script requires the SES Core (v2.0) and SES Console (v1.3) scripts in
 # order to function. Both of these scripts may be found in the SES source
 # repository at the following locations:
 # 
@@ -78,23 +78,33 @@
 # the SES Core and SES Console, but above other custom scripts.
 # 
 #++
+
+# SES
+# =============================================================================
+# The top-level namespace for all SES scripts.
 module SES
-  # ===========================================================================
   # Debugger
   # ===========================================================================
   # Provides a simple debugger with break points, halting of game execution,
   # and contextual awareness.
   module Debugger
     class << self
+      # The number of lines of code to surround break points with.
+      # @return [FixNum]
       attr_accessor :code_lines
+      
+      # Hash of break points. Keys are script names in the Ace Script Editor,
+      # values are an array of line numbers to debug.
+      # @return [Hash{String => Array<FixNum>}]
       attr_reader   :breakpoints
     end
       
     # Ensure that we have the minimum script requirements.
-    Register.require(:Core => 2.0, :Console => 1.0)
+    Register.require(:Core => 2.0, :Console => 1.3)
     # =========================================================================
     # BEGIN CONFIGURATION
     # =========================================================================
+    
     # The Input module constant to use for enabling the debugger.
     TRIGGER = Input::F6
     
@@ -109,16 +119,15 @@ module SES
     #       'Scene_Base' => [40, 46],
     #       'Scene_Map' => [60],
     #     }
-    @breakpoints = {}
+    @breakpoints = {
+      # Include your desired breakpoints here.
+    }
     # =========================================================================
     # END CONFIGURATION
     # =========================================================================
+    
     # Tracing lambda given to 'Kernel.set_trace_func' to perform debugging
-    # operations (namely break points). When a break point is encountered, the
-    # game stops execution and opens the SES Console with the active class at
-    # the time as the context. Once the SES Console has been exited, the
-    # context is reset to the context held before the break point was
-    # encountered.
+    # operations (namely break points).
     Lambda = ->(event, file, line, id, binding, class_name) do
       # Help mitigate lag by only focusing on the events needed.
       return unless ['call', 'c-call'].any? { |type| event == type }
@@ -130,17 +139,16 @@ module SES
       file.gsub!(/^{\d+}/, $RGSS_SCRIPTS[$1.to_i][1]) if file =~ /^{(\d+)}/
       return unless @breakpoints[file]
       if @breakpoints[file].include?(line)
-        # Grab the object which called the code the break point is set for.
-        context = eval('self', binding)
-        puts "**  BREAK: #{file}, line #{line} (#{context_string(context)}) **"
+        object = context_string(eval('self', binding))
+        puts "**  BREAK: #{file}, line #{line} (#{object}) **"
         puts "**   CODE: \n#{script_line(file_number, line)}"
         # Store the previous REPL context and set up the console environment.
         previous_context = SES::Console.context
-        SES::Console.context, SES::Console.enabled = context, true
+        SES::Console.context, SES::Console.enabled = binding, true
         # Open the console; this halts the game loop until the REPL is exited.
         SES::Console.open
         # Debugging work is done, reset the context of the console.
-        puts "** RETURN: Reset context to #{previous_context} **"
+        puts "** RETURN: Reset context to #{eval('self', previous_context)} **"
         SES::Console.context = previous_context
       end
     end
@@ -149,20 +157,29 @@ module SES
     # is a class or module, the name of the class or module is returned. If the
     # object is an instance, the name of the instance's class is returned along
     # with the hexadecimal object ID representing the individual object.
-    def self.context_string(context)
-      if (context.class == Class || context.class == Module)
+    # 
+    # @param object [Object] the object to generate a context string for
+    # @return [String] the appropriate context string
+    def self.context_string(object)
+      if (object.class == Class || object.class == Module)
         context.name
       else
         # Using `__id__` rather than `object_id` in order to account for the
         # possibiity of a `BasicObject` instance being the context. Same for
         # the `rescue nil` -- `BasicObject` has no `class` method.
-        "#{context.class.name rescue nil} 0x#{(context.__id__ << 1).to_s(16)}"
+        "#{object.class.name rescue nil} 0x#{(object.__id__ << 1).to_s(16)}"
       end
     end
     
     # Generates a stub of code from the given script number. Includes the given
-    # line number surrounded by the given number of surrounding lines. Returns
-    # a string of the code stub with a notice for the line of the break point.
+    # line number surrounded by the given number of surrounding lines.
+    # 
+    # @param script [FixNum] the script ID to generate a code stub for
+    # @param line [FixNum] the target line number
+    # @param wrap [FixNum] the number of lines above and below the target to
+    #   display
+    # @return [String] the requested code stub with a break point notice on the
+    #   targeted line
     def self.script_line(script, line, wrap = @code_lines)
       line  -= 1
       # Grab the script's code, convert it to UTF-8 in case of an alternative
@@ -172,12 +189,14 @@ module SES
       # low and high limits into account.
       start  = (line - wrap < 0 ? 0 : line - wrap)
       stop   = (line + wrap > script.size ? script.size - 1 : line + wrap)
-      script[line] << " <--- ** BREAK POINT **"
+      script[line] << ' <--- ** BREAK POINT **'
       script[start..stop].join("\r\n")
     end
     
     # Calls `Kernel.set_trace_func` with `SES::Debugger::Lambda` as the tracing
-    # block to run. Returns `true` if started, `false` otherwise.
+    # block to run.
+    # 
+    # @return [Boolean] `true` if started, `false` otherwise
     def self.start
       return false if @breakpoints.empty?
       Kernel.set_trace_func(Lambda)
@@ -185,7 +204,9 @@ module SES
     end
     
     # Closes the SES Console, stops all `Kernel.set_trace_func` tracing, then
-    # focuses on the RGSS Player. Returns `true` if stopped, `false` otherwise.
+    # focuses on the RGSS Player.
+    # 
+    # @return [Boolean] `true` if stopped, `false` otherwise
     def self.stop
       Kernel.set_trace_func(nil)
       Win32.focus(Win32::HWND::Game) unless SES::Console.enabled
@@ -194,27 +215,32 @@ module SES
       false
     end
     
-    # Register this script with the SES Core.
-    Description = Script.new(:Debugger, 1.2, :Solistra)
+    # Script metadata.
+    Description = Script.new(:Debugger, 1.3, :Solistra)
     Register.enter(Description)
   end
 end
-# =============================================================================
 # Scene_Base
 # =============================================================================
+# Superclass of all scenes within the game.
 class Scene_Base
-  # Only update the SES Debugger if the game is being run in test mode and the
-  # console window is shown.
-  if $TEST && SES::Win32::HWND::Console > 0
-    alias :ses_debugger_sb_upd :update
-    def update(*args, &block)
-      update_ses_debugger
-      ses_debugger_sb_upd(*args, &block)
-    end
-    
-    # Start the SES Debugger if the configured `Input` key is triggered.
-    def update_ses_debugger
-      SES::Debugger.start if Input.trigger?(SES::Debugger::TRIGGER)
-    end
+  # Aliased to update the calling conditions for starting the SES Debugger.
+  # 
+  # @see #update
+  alias :ses_debugger_sb_upd :update
+  
+  # Performs scene update logic.
+  # 
+  # @return [void]
+  def update(*args, &block)
+    update_ses_debugger
+    ses_debugger_sb_upd(*args, &block)
+  end
+  
+  # Start the SES Debugger if the configured `Input` key is triggered.
+  # 
+  # @return [void]
+  def update_ses_debugger
+    SES::Debugger.start if Input.trigger?(SES::Debugger::TRIGGER)
   end
 end

@@ -1,5 +1,5 @@
 
-Debugger v1.2 by Solistra
+Debugger v1.3 by Solistra
 =============================================================================
 
 Summary
@@ -67,7 +67,7 @@ information.
 
 Installation
 -----------------------------------------------------------------------------
-  This script requires the SES Core (v2.0) and SES Console (v1.0) scripts in
+  This script requires the SES Core (v2.0) and SES Console (v1.3) scripts in
 order to function. Both of these scripts may be found in the SES source
 repository at the following locations:
 

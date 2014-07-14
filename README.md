@@ -30,14 +30,14 @@ following either through the SES Console or a script call:
 
     SES::Debugger.stop
 
-  Break points are stored as a hash in the SES::Debugger module (aptly named
-"@breakpoints"). The instance variable storing the hash is also a reader
+  Break points are stored as a hash in the `SES::Debugger` module (named
+`@breakpoints`). The instance variable storing the hash is also a reader
 method for the module, allowing you to dynamically add, remove, or modify the
 breakpoints during game execution. Break points are defined within the hash
 with the file name of the script as the key and an array of line numbers to
 serve as break points as the value.
 
-  For example, let's assume that we want to break every time Scene_Base is
+  For example, let's assume that we want to break every time `Scene_Base` is
 told to update. In order to set up that break point, we could do one of two
 things (depending on when we need the break point set): we can either include
 the break point in the configuration area of the script, or we can set the
@@ -53,11 +53,21 @@ demonstrate both methods:
     # Dynamically adding the break point.
     SES::Debugger.breakpoints['Scene_Base'] = [40]
 
-  If we then decide that we need to break whenever Scene_Base performs a
+  If we then decide that we need to break whenever `Scene_Base` performs a
 basic update, we can either add line 46 to the configuration area or add it
 during runtime like so:
 
     SES::Debugger.breakpoints['Scene_Base'].push(46)
+
+  Since version 1.3 of the SES Debugger, you may also dynamically set break
+points in your code via the `Kernel#breakpoint` method which will create a
+breakpoint for the line directly following the line where the method call was
+placed. This is particularly useful when debugging your own code and you only
+require breakpoints for temporary testing purposes.
+
+  **NOTE**: Using the `Kernel#breakpoint` method does not automatically start
+the SES Debugger when the method is encountered -- it simply creates the
+break point. It is still up to you to enable debugging when you require it.
 
 License
 -----------------------------------------------------------------------------

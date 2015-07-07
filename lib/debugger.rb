@@ -278,17 +278,12 @@ module Kernel
   # the line this method is placed on. Particularly useful when a breakpoint
   # is only temporarily required.
   # 
-  # @return [Boolean] `true` if the breakpoint was added, `false` otherwise
+  # @return [void]
   def breakpoint
-    point = caller.first.split(/:/).shift(2)
-    file  = point.first.gsub!(/^{(\d+)}/) { $RGSS_SCRIPTS[$1.to_i][1] }
-    line  = point.last.to_i + 1
-    SES::Debugger.breakpoints[file] ||= []
-    if SES::Debugger.breakpoints[file].include?(line)
-      return false
-    else
-      SES::Debugger.breakpoints[file].push(line)
-      return true
-    end
+    point = caller[0].split(':').shift(2)
+    file  = point[0].sub!(/^{(\d+)}/) { $RGSS_SCRIPTS[$1.to_i][1] }
+    line  = point[-1].to_i + 1
+    breakpoints = SES::Debugger.breakpoints[file] ||= []
+    breakpoints << line unless breakpoints.include?(line)
   end
 end

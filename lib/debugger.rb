@@ -246,28 +246,23 @@ module SES
     Register.enter(Description)
   end
 end
-# Scene_Base
+# Graphics
 # =============================================================================
-# Superclass of all scenes within the game.
-class Scene_Base
+# Module which handles all GDI+ screen drawing.
+class << Graphics
   # Aliased to update the calling conditions for starting the SES Debugger.
   # 
   # @see #update
-  alias_method :ses_debugger_sb_upd, :update
+  alias_method :ses_debugger_gfx_upd, :update
   
-  # Performs scene update logic.
+  # Performs graphical updates and provides the global logic timer; in addition
+  # to this, starts the SES Debugger if the configured `Input` key is
+  # triggered.
   # 
   # @return [void]
-  def update(*args, &block)
-    update_ses_debugger
-    ses_debugger_sb_upd(*args, &block)
-  end
-  
-  # Start the SES Debugger if the configured `Input` key is triggered.
-  # 
-  # @return [void]
-  def update_ses_debugger
+  def update
     SES::Debugger.start if Input.trigger?(SES::Debugger::TRIGGER)
+    ses_debugger_gfx_upd
   end
 end
 # Kernel

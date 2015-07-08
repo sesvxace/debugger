@@ -77,7 +77,7 @@
 # 
 # Installation
 # -----------------------------------------------------------------------------
-#   This script requires the SES Core (v2.0) and SES Console (v1.3) scripts in
+#   This script requires the SES Core (v2.0) and SES Console (v1.6) scripts in
 # order to function. Both of these scripts may be found in the SES source
 # repository at the following locations:
 # 
@@ -98,24 +98,6 @@ module SES
   # Provides a simple debugger with break points, halting of game execution,
   # and contextual awareness.
   module Debugger
-    class << self
-      # The number of lines of code to surround break points with.
-      # @return [FixNum]
-      attr_accessor :code_lines
-      
-      # Hash of strings used to format the SES Debugger's output while using
-      # the debugger.
-      # @return [Hash{Symbol => String}]
-      attr_reader :format
-      
-      # Hash of break points. Keys are script names in the Ace Script Editor,
-      # values are an array of line numbers to debug.
-      # @return [Hash{String => Array<FixNum>}]
-      attr_reader :breakpoints
-    end
-      
-    # Ensure that we have the minimum script requirements.
-    Register.require(:Core => 2.0, :Console => 1.3)
     # =========================================================================
     # BEGIN CONFIGURATION
     # =========================================================================
@@ -127,114 +109,169 @@ module SES
     # defines the number of lines both above and below the break point to show.
     @code_lines = 5
     
-    # Hash of debugging break points. Hash keys are the names of Ace scripts as
-    # written in the Script Editor, values are an array of line numbers that
-    # serve as the break points. Example:
-    #     @breakpoints = {
-    #       'Scene_Base' => [40, 46],
-    #       'Scene_Map' => [60],
-    #     }
-    @breakpoints = {
-      # Include your desired breakpoints here.
-    }
+    # Array of debugging break points. Populate this array with representative
+    # strings for methods; for example, the `update` instance method of the
+    # `Scene_Base` class would be represented as "Scene_Base#update`, while the
+    # `setup` class method of `BattleManager` would be "BattleManager.setup".
+    # Example:
+    #     @breakpoints = [
+    #       'Scene_Map#update',
+    #       'BattleManager.setup',
+    #       'Game_Party#gain_item',
+    #       'SceneManager.return',
+    #     ]
+    @breakpoints = [
+      # Include your desired break points here.
+      'SES::Exporter.call',
+    ]
     
     # Determines the format of the output written while debugging code with the
     # SES Debugger. Each of the keys defined here contains a string value which
     # is populated with information via `sprintf`.
     @format = {
       :start      => '**  BREAK: %s, line %d (%s)',
-      :code       => "**   CODE: \n%s",
-      :breakpoint => ' <--- ** BREAK POINT **',
+      :code       => "** SCRIPT: \n%s",
+      :breakpoint => '->',
       :reset      => '** RETURN: Reset context (%s)'
     }
     # =========================================================================
     # END CONFIGURATION
     # =========================================================================
     
+    class << self
+      # The number of lines of code to surround break points with.
+      # @return [Fixnum]
+      attr_accessor :code_lines
+      
+      # Whether or not the SES Debugger has been explicitly enabled.
+      # @return [Boolean]
+      attr_reader  :enabled
+      alias_method :enabled?, :enabled
+      
+      # Hash of strings used to format the SES Debugger's output while using
+      # the debugger.
+      # @return [Hash{Symbol => String}]
+      attr_reader :format
+      
+      # Hash of break points. Keys are constants, values are an array of line
+      # numbers to debug.
+      # @return [Hash{Module => Array<Fixnum>}]
+      attr_reader :breakpoints
+    end
+    
+    # Explicitly assign `false` as the default enabled status.
+    @enabled = false
+        
+    # Ensure that we have the minimum script requirements.
+    Register.require(:Core => 2.0, :Console => 1.6)
+    
     # Tracing lambda given to `Kernel.set_trace_func` to perform debugging
     # operations (namely break points).
-    Lambda = ->(event, file, line, id, binding, class_name) do
-      return unless ['call', 'c-call'].any? { |type| event == type }
-      SES::Debugger.debug(file, line, binding)
-    end
-    
-    # Begins debugging the code at the specified line in the specified file
-    # with the SES Console set to the given contextual binding.
-    # 
-    # @note This method is not intended to be called on its own, but as part of
-    #   {SES::Debugger::Lambda} via `Kernel.set_trace_func`.
-    # 
-    # @return [Binding, nil] the reset SES Console context or `nil` if no
-    #   debugging session was entered
-    def self.debug(file, line, binding)
-      file_number = file.dup[1..4].to_i
-      file.gsub!(/^{(\d+)}/) { $RGSS_SCRIPTS[$1.to_i][1] }
-      return unless @breakpoints[file]
-      if @breakpoints[file].include?(line)
-        object = context_string(eval('self', binding))
-        puts @format[:start] % [file, line, object]
-        puts @format[:code]  % script_line(file_number, line)
-        
-        previous_context     = SES::Console.context
-        SES::Console.context = binding
-        SES::Console.enabled = true
-        SES::Console.open
-        
-        object = context_string(eval('self', previous_context))
-        puts @format[:reset] % object
-        SES::Console.context = previous_context
-      end
-    end
-    
-    # Returns the "context string" for the given context object. If the object
-    # is a class or module, the name of the class or module is returned. If the
-    # object is an instance, the name of the instance's class is returned along
-    # with the hexadecimal object ID representing the individual object.
-    # 
-    # @param object [Object] the object to generate a context string for
-    # @return [String] the appropriate context string
-    def self.context_string(object)
-      if [Class, Module].any? { |base| object.class == base }
-        object.name
-      else
-        "#{object.class.name rescue nil} 0x#{(object.__id__ << 1).to_s(16)}"
-      end
+    Lambda = ->(event, file, line, _, binding, klass) do
+      return unless event == 'line' && @breakpoints[klass] &&
+        @breakpoints[klass].include?(line)
+      filename = file.sub(/^{(\d+)}/) { $RGSS_SCRIPTS[$1.to_i][1] }
+      puts @format[:start] % [filename, line, eval('self', binding)]
+      puts @format[:code]  % script_line(file.dup[1..4].to_i, line)
+      previous_context     = SES::Console.context
+      SES::Console.context = binding
+      SES::Console.enabled = true
+      SES::Console.open
+      puts @format[:reset] % eval('self', previous_context)
+      SES::Console.context = previous_context
     end
     
     # Generates a stub of code from the given script number. Includes the given
     # line number surrounded by the given number of surrounding lines.
     # 
-    # @param script [FixNum] the script ID to generate a code stub for
-    # @param line [FixNum] the target line number
-    # @param wrap [FixNum] the number of lines above and below the target to
+    # @param script [Fixnum] the script ID to generate a code stub for
+    # @param line [Fixnum] the target line number
+    # @param wrap [Fixnum] the number of lines above and below the target to
     #   display
     # @return [String] the requested code stub with a break point notice on the
     #   targeted line
     def self.script_line(script, line, wrap = @code_lines)
       line  -= 1
-      script = $RGSS_SCRIPTS[script].last.force_encoding('utf-8').split("\r\n")
+      script = $RGSS_SCRIPTS[script][3].force_encoding('utf-8').split("\r\n")
       start  = (line - wrap < 0 ? 0 : line - wrap)
-      stop   = (line + wrap > script.size ? script.size - 1 : line + wrap)
-      script[line] << @format[:breakpoint]
-      script[start..stop].join("\r\n")
+      script[line][0...@format[:breakpoint].size] = @format[:breakpoint]
+      script[start..line + wrap].join("\n")
     end
+    class << self ; private :script_line ; end
+    
+    # Dynamically adds a breakpoint to the SES Debugger given as a string
+    # representing the desired instance or class method.
+    # 
+    # @example
+    #     SES::Debugger.add('Scene_Map#start')
+    #     SES::Debugger << 'SceneManager.return'
+    # 
+    # @param point [String] a string representing a class or module and the
+    #   desired instance or class method to add a breakpoint for
+    # @return [Array<Fixnum>] the current array of breakpoints for the class or
+    #   module which had a breakpoint added to it
+    def self.add(point)
+      klass, method = *convert_breakpoint(point)
+      breakpoints   = @breakpoints[klass] ||= []
+      line          = method.source_location[1] + 1
+      breakpoints << line unless breakpoints.include?(line)
+    end
+    class << self ; alias_method :<<, :add ; end
+    
+    # Converts the user-configurable array of debugging breakpoints into the
+    # hash structure consumed by the debugging process.
+    # 
+    # @note While this method is publicly available, it is _not_ intended to
+    #   be called by individual users; as such, it should be seen as private.
+    # 
+    # @return [void] the converted hash of breakpoints
+    def self.convert_breakpoints
+      return unless @breakpoints.kind_of?(Array)
+      breakpoints  = @breakpoints.dup
+      @breakpoints = {}
+      breakpoints.each(&method(:add))
+    end
+    
+    # Converts a string representing a class and method (whether defined as an
+    # instance or class method) into an array containing the actual `Class`
+    # object and its unbound method.
+    # 
+    # @param point [String] a string representing a class or module and the
+    #   desired instance or class method
+    # @return [Array<Module, UnboundMethod>] the resolved `Class` or `Module`
+    #   object and its associated `UnboundMethod`
+    def self.convert_breakpoint(point)
+      k, m = point.include?('#') ? point.split('#') : point.split('.')
+      klass = k.split('::').reduce(Object) { |obj, con| obj.const_get(con) }
+      method = if point.include?('#')
+        klass.instance_method(m)
+      else
+        klass.method(m) rescue klass.instance_method(m)
+      end
+      [klass, method]
+    end
+    class << self ; private :convert_breakpoint ; end
     
     # Calls `Kernel.set_trace_func` with {SES::Debugger::Lambda} as the tracing
     # block to run.
     # 
     # @return [void]
     def self.start
+      @enabled = true
       Kernel.set_trace_func(Lambda)
+      puts 'SES Debugger started.'
     end
     
-    # Stops all `Kernel.set_trace_func` tracing, effectively stopping the
-    # SES Debugger.
+    # Stops all `Kernel.set_trace_func` tracing, effectively stopping the SES
+    # Debugger.
     # 
     # @return [void]
     def self.stop
+      @enabled = false
       Kernel.set_trace_func(nil)
+      puts 'SES Debugger stopped.'
     end
-
+    
     # Script metadata.
     Description = Script.new(:Debugger, 1.3, :Solistra)
     Register.enter(Description)
@@ -244,19 +281,44 @@ end
 # =============================================================================
 # Module which handles all GDI+ screen drawing.
 class << Graphics
-  # Aliased to update the calling conditions for starting the SES Debugger.
+  # Aliased to update the calling conditions for starting and stopping the SES
+  # Debugger.
   # 
   # @see #update
-  alias_method :ses_debugger_gfx_upd, :update
+  alias_method :ses_debugger_gfx_update, :update
   
   # Performs graphical updates and provides the global logic timer; in addition
-  # to this, starts the SES Debugger if the configured `Input` key is
+  # to this, starts or stops the SES Debugger if the configured `Input` key is
   # triggered.
   # 
   # @return [void]
   def update
-    SES::Debugger.start if Input.trigger?(SES::Debugger::TRIGGER)
-    ses_debugger_gfx_upd
+    if Input.trigger?(SES::Debugger::TRIGGER)
+      SES::Debugger.enabled? ? SES::Debugger.stop : SES::Debugger.start
+    end
+    ses_debugger_gfx_update
+  end
+end
+# DataManager
+# =============================================================================
+class << DataManager
+  # Aliased to automatically convert user-configured breakpoints into the
+  # appropriate hash structure for the SES Debugger on game start.
+  # 
+  # @see #init
+  alias_method :ses_debugger_dm_init, :init
+  
+  # Converts the user-configurable breakpoints for the SES debugger and 
+  # initializes all of the data used by the game.
+  # 
+  # @note Breakpoint conversion is done here so that the SES Debugger may be
+  #   configured to set breakpoints in scripts included _below_ it in the Ace
+  #   script editor without raising errors.
+  # 
+  # @return [void]
+  def init
+    SES::Debugger.convert_breakpoints
+    ses_debugger_dm_init
   end
 end
 # Kernel
@@ -269,10 +331,9 @@ module Kernel
   # 
   # @return [void]
   def breakpoint
-    point = caller[0].split(':').shift(2)
-    file  = point[0].sub!(/^{(\d+)}/) { $RGSS_SCRIPTS[$1.to_i][1] }
-    line  = point[-1].to_i + 1
-    breakpoints = SES::Debugger.breakpoints[file] ||= []
+    klass = is_a?(Module) ? self : self.__class__
+    line  = caller[0].split(':')[1].to_i
+    breakpoints = SES::Debugger.breakpoints[klass] ||= []
     breakpoints << line unless breakpoints.include?(line)
   end
 end

@@ -30,12 +30,15 @@ following either through the SES Console or a script call:
 
     SES::Debugger.stop
 
-  Break points are stored as a hash in the `SES::Debugger` module (named
-`@breakpoints`). The instance variable storing the hash is also a reader
-method for the module, allowing you to dynamically add, remove, or modify the
-breakpoints during game execution. Break points are defined within the hash
-with the file name of the script as the key and an array of line numbers to
-serve as break points as the value.
+  Break points are set using the debugger by specifying the desired class or
+module and method which should act as a trigger using a string written in the
+Ruby standard notation for class and instance methods. For example, adding a
+break point for the `update` instance method of `Scene_Base` is specified
+with `'Scene_Base#update'`, while the `return` class method of `SceneManager`
+is specified with `'SceneManager.return'`.
+
+  **NOTE:** It is perfectly valid to include break points for objects defined
+in scripts that have been included below the debugger.
 
   For example, let's assume that we want to break every time `Scene_Base` is
 told to update. In order to set up that break point, we could do one of two
@@ -46,24 +49,25 @@ a REPL -- such as the console -- or a script call). The following examples
 demonstrate both methods:
 
     # Configuration area.
-    @breakpoints = {
-      'Scene_Base' => [40],
-    }
+    @breakpoints = [
+      'Scene_Base#update',
+    ]
     
     # Dynamically adding the break point.
-    SES::Debugger.breakpoints['Scene_Base'] = [40]
+    SES::Debugger.add('Scene_Base#update')
+    
+    # Alternative syntax for dynamically adding a break point.
+    SES::Debugger << 'Scene_Base#update'
 
-  If we then decide that we need to break whenever `Scene_Base` performs a
-basic update, we can either add line 46 to the configuration area or add it
-during runtime like so:
+  Note that you can also add multiple break points at once if desired:
 
-    SES::Debugger.breakpoints['Scene_Base'].push(46)
+    SES::Debugger.add('Scene_Base#update', 'SceneManager.return', ...)
 
   Since version 1.3 of the SES Debugger, you may also dynamically set break
 points in your code via the `Kernel#breakpoint` method which will create a
-breakpoint for the line directly following the line where the method call was
-placed. This is particularly useful when debugging your own code and you only
-require breakpoints for temporary testing purposes.
+break point for the line where the method call was placed. This is
+particularly useful when debugging your own code and you only require break
+points for temporary testing purposes.
 
   **NOTE**: Using the `Kernel#breakpoint` method does not automatically start
 the SES Debugger when the method is encountered -- it simply creates the
@@ -77,7 +81,7 @@ information.
 
 Installation
 -----------------------------------------------------------------------------
-  This script requires the SES Core (v2.0) and SES Console (v1.3) scripts in
+  This script requires the SES Core (v2.0) and SES Console (v1.6) scripts in
 order to function. Both of these scripts may be found in the SES source
 repository at the following locations:
 

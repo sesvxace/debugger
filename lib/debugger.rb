@@ -1,5 +1,5 @@
 #--
-# Debugger v1.3 by Solistra
+# Debugger v1.4 by Solistra
 # =============================================================================
 # 
 # Summary
@@ -281,7 +281,7 @@ module SES
     end
     
     # Script metadata.
-    Description = Script.new(:Debugger, 1.3, :Solistra)
+    Description = Script.new(:Debugger, 1.4, :Solistra)
     Register.enter(Description)
   end
 end

@@ -1,5 +1,5 @@
 
-Debugger v1.3 by Solistra
+Debugger v1.4 by Solistra
 =============================================================================
 
 Summary

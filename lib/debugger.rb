@@ -30,12 +30,15 @@
 # 
 #     SES::Debugger.stop
 # 
-#   Break points are stored as a hash in the `SES::Debugger` module (named
-# `@breakpoints`). The instance variable storing the hash is also a reader
-# method for the module, allowing you to dynamically add, remove, or modify the
-# breakpoints during game execution. Break points are defined within the hash
-# with the file name of the script as the key and an array of line numbers to
-# serve as break points as the value.
+#   Break points are set using the debugger by specifying the desired class or
+# module and method which should act as a trigger using a string written in the
+# Ruby standard notation for class and instance methods. For example, adding a
+# break point for the `update` instance method of `Scene_Base` is specified
+# with `'Scene_Base#update'`, while the `return` class method of `SceneManager`
+# is specified with `'SceneManager.return'`.
+# 
+#   **NOTE:** It is perfectly valid to include break points for objects defined
+# in scripts that have been included below the debugger.
 # 
 #   For example, let's assume that we want to break every time `Scene_Base` is
 # told to update. In order to set up that break point, we could do one of two
@@ -46,24 +49,25 @@
 # demonstrate both methods:
 # 
 #     # Configuration area.
-#     @breakpoints = {
-#       'Scene_Base' => [40],
-#     }
+#     @breakpoints = [
+#       'Scene_Base#update',
+#     ]
 #     
 #     # Dynamically adding the break point.
-#     SES::Debugger.breakpoints['Scene_Base'] = [40]
+#     SES::Debugger.add('Scene_Base#update')
+#     
+#     # Alternative syntax for dynamically adding a break point.
+#     SES::Debugger << 'Scene_Base#update'
 # 
-#   If we then decide that we need to break whenever `Scene_Base` performs a
-# basic update, we can either add line 46 to the configuration area or add it
-# during runtime like so:
+#   Note that you can also add multiple break points at once if desired:
 # 
-#     SES::Debugger.breakpoints['Scene_Base'].push(46)
+#     SES::Debugger.add('Scene_Base#update', 'SceneManager.return', ...)
 # 
 #   Since version 1.3 of the SES Debugger, you may also dynamically set break
 # points in your code via the `Kernel#breakpoint` method which will create a
-# breakpoint for the line directly following the line where the method call was
-# placed. This is particularly useful when debugging your own code and you only
-# require breakpoints for temporary testing purposes.
+# break point for the line where the method call was placed. This is
+# particularly useful when debugging your own code and you only require break
+# points for temporary testing purposes.
 # 
 #   **NOTE**: Using the `Kernel#breakpoint` method does not automatically start
 # the SES Debugger when the method is encountered -- it simply creates the
@@ -122,7 +126,6 @@ module SES
     #     ]
     @breakpoints = [
       # Include your desired break points here.
-      'SES::Exporter.call',
     ]
     
     # Determines the format of the output written while debugging code with the
@@ -139,23 +142,20 @@ module SES
     # =========================================================================
     
     class << self
-      # The number of lines of code to surround break points with.
-      # @return [Fixnum]
+      # @return [Fixnum] the number of lines of code to surround break points
+      #   with
       attr_accessor :code_lines
       
-      # Whether or not the SES Debugger has been explicitly enabled.
-      # @return [Boolean]
+      # @return [Boolean] whether or not the SES Debugger has been enabled
       attr_reader  :enabled
       alias_method :enabled?, :enabled
       
-      # Hash of strings used to format the SES Debugger's output while using
-      # the debugger.
-      # @return [Hash{Symbol => String}]
+      # @return [Hash{Symbol => String}] hash of strings used to format the SES
+      #   Debugger's output while using the debugger
       attr_reader :format
       
-      # Hash of break points. Keys are constants, values are an array of line
-      # numbers to debug.
-      # @return [Hash{Module => Array<Fixnum>}]
+      # @return [Hash{Module => Array<Fixnum>}] hash of break points; keys are
+      #   constants, values are an array of line numbers to debug
       attr_reader :breakpoints
     end
     
@@ -199,32 +199,40 @@ module SES
     end
     class << self ; private :script_line ; end
     
-    # Dynamically adds a breakpoint to the SES Debugger given as a string
+    # Dynamically adds a break point to the SES Debugger given as a string
     # representing the desired instance or class method.
     # 
     # @example
     #     SES::Debugger.add('Scene_Map#start')
     #     SES::Debugger << 'SceneManager.return'
     # 
-    # @param point [String] a string representing a class or module and the
-    #   desired instance or class method to add a breakpoint for
-    # @return [Array<Fixnum>] the current array of breakpoints for the class or
-    #   module which had a breakpoint added to it
-    def self.add(point)
-      klass, method = *convert_breakpoint(point)
-      breakpoints   = @breakpoints[klass] ||= []
-      line          = method.source_location[1] + 1
-      breakpoints << line unless breakpoints.include?(line)
+    # @param points [Array<String>] an array of strings representing classes or
+    #   modules and the desired instance or class methods to add break points
+    #   for
+    # @return [Hash{Module=>Fixnum}] hash of the break points added to the
+    #   debugger
+    def self.add(*points)
+      return_value = {}
+      points.each do |point|
+        klass, method = *convert_breakpoint(point)
+        breakpoints   = @breakpoints[klass] ||= []
+        line          = method.source_location[1] + 1
+        unless breakpoints.include?(line)
+          (return_value[klass] ||= []) << line
+          breakpoints << line
+        end
+      end
+      return_value
     end
     class << self ; alias_method :<<, :add ; end
     
-    # Converts the user-configurable array of debugging breakpoints into the
+    # Converts the user-configurable array of debugging break points into the
     # hash structure consumed by the debugging process.
     # 
     # @note While this method is publicly available, it is _not_ intended to
     #   be called by individual users; as such, it should be seen as private.
     # 
-    # @return [void] the converted hash of breakpoints
+    # @return [void]
     def self.convert_breakpoints
       return unless @breakpoints.kind_of?(Array)
       breakpoints  = @breakpoints.dup
@@ -301,18 +309,19 @@ class << Graphics
 end
 # DataManager
 # =============================================================================
+# The singleton class of the default RPG Maker module for handling data.
 class << DataManager
-  # Aliased to automatically convert user-configured breakpoints into the
+  # Aliased to automatically convert user-configured break points into the
   # appropriate hash structure for the SES Debugger on game start.
   # 
   # @see #init
   alias_method :ses_debugger_dm_init, :init
   
-  # Converts the user-configurable breakpoints for the SES debugger and 
+  # Converts the user-configurable break points for the SES debugger and 
   # initializes all of the data used by the game.
   # 
-  # @note Breakpoint conversion is done here so that the SES Debugger may be
-  #   configured to set breakpoints in scripts included _below_ it in the Ace
+  # @note Break point conversion is done here so that the SES Debugger may be
+  #   configured to set break points in scripts included _below_ it in the Ace
   #   script editor without raising errors.
   # 
   # @return [void]
@@ -325,8 +334,8 @@ end
 # =============================================================================
 # Methods defined here are automatically available to all Ruby objects.
 module Kernel
-  # Dynamically sets a breakpoint for the SES Debugger at the line following
-  # the line this method is placed on. Particularly useful when a breakpoint
+  # Dynamically sets a break point for the SES Debugger at the line following
+  # the line this method is placed on. Particularly useful when a break point
   # is only temporarily required.
   # 
   # @return [void]

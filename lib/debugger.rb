@@ -222,25 +222,19 @@ module SES
     # Calls `Kernel.set_trace_func` with {SES::Debugger::Lambda} as the tracing
     # block to run.
     # 
-    # @return [Boolean] `true` if started, `false` otherwise
+    # @return [void]
     def self.start
-      return false if @breakpoints.empty?
       Kernel.set_trace_func(Lambda)
-      true
     end
     
-    # Closes the SES Console, stops all `Kernel.set_trace_func` tracing, then
-    # focuses on the RGSS Player.
+    # Stops all `Kernel.set_trace_func` tracing, effectively stopping the
+    # SES Debugger.
     # 
-    # @return [Boolean] `true` if stopped, `false` otherwise
+    # @return [void]
     def self.stop
       Kernel.set_trace_func(nil)
-      Win32.focus(Win32::HWND::Game) unless SES::Console.enabled
-      true
-    rescue
-      false
     end
-    
+
     # Script metadata.
     Description = Script.new(:Debugger, 1.3, :Solistra)
     Register.enter(Description)

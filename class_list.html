@@ -20,7 +20,11 @@
   </head>
   <body>
     <script type="text/javascript" charset="utf-8">
-      if (window.top.frames.main) {
+      var hasFrames = false;
+      try {
+        hasFrames = window.top.frames.main ? true : false;
+      } catch (e) { }
+      if (hasFrames) {
         document.getElementById('base_target').target = 'main';
         document.body.className = 'frames';
       }
@@ -46,7 +50,7 @@
 
       <ul id="full_list" class="class">
         <li><span class='object_link'><a href="top-level-namespace.html" title="Top Level Namespace (root)">Top Level Namespace</a></span></li>
-<li><span class='object_link'><a href="Kernel.html" title="Kernel (module)">Kernel</a></span><small class='search_info'>Top Level Namespace</small></li><li><a class='toggle'></a> <span class='object_link'><a href="SES.html" title="SES (module)">SES</a></span><small class='search_info'>Top Level Namespace</small></li><ul><li><span class='object_link'><a href="SES/Debugger.html" title="SES::Debugger (module)">Debugger</a></span><small class='search_info'>SES</small></li></ul><li><span class='object_link'><a href="Scene_Base.html" title="Scene_Base (class)">Scene_Base</a></span> &lt; Object<small class='search_info'>Top Level Namespace</small></li>
+<li><span class='object_link'><a href="DataManager.html" title="DataManager (class)">DataManager</a></span> &lt; Object<small class='search_info'>Top Level Namespace</small></li><li><span class='object_link'><a href="Graphics.html" title="Graphics (class)">Graphics</a></span> &lt; Object<small class='search_info'>Top Level Namespace</small></li><li><span class='object_link'><a href="Kernel.html" title="Kernel (module)">Kernel</a></span><small class='search_info'>Top Level Namespace</small></li><li><a class='toggle'></a> <span class='object_link'><a href="SES.html" title="SES (module)">SES</a></span><small class='search_info'>Top Level Namespace</small></li><ul><li><span class='object_link'><a href="SES/Debugger.html" title="SES::Debugger (module)">Debugger</a></span><small class='search_info'>SES</small></li></ul>
 
       </ul>
     </div>

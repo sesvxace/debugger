@@ -20,7 +20,11 @@
   </head>
   <body>
     <script type="text/javascript" charset="utf-8">
-      if (window.top.frames.main) {
+      var hasFrames = false;
+      try {
+        hasFrames = window.top.frames.main ? true : false;
+      } catch (e) { }
+      if (hasFrames) {
         document.getElementById('base_target').target = 'main';
         document.body.className = 'frames';
       }
@@ -48,50 +52,62 @@
         
 
   <li class="r1 ">
+    <span class='object_link'><a href="SES/Debugger.html#add-class_method" title="SES::Debugger.add (method)">add</a></span>
+    <small>SES::Debugger</small>
+  </li>
+  
+
+  <li class="r2 ">
     <span class='object_link'><a href="Kernel.html#breakpoint-instance_method" title="Kernel#breakpoint (method)">#breakpoint</a></span>
     <small>Kernel</small>
   </li>
   
 
-  <li class="r2 ">
+  <li class="r1 ">
     <span class='object_link'><a href="SES/Debugger.html#breakpoints-class_method" title="SES::Debugger.breakpoints (method)">breakpoints</a></span>
     <small>SES::Debugger</small>
   </li>
   
 
-  <li class="r1 ">
+  <li class="r2 ">
     <span class='object_link'><a href="SES/Debugger.html#code_lines-class_method" title="SES::Debugger.code_lines (method)">code_lines</a></span>
     <small>SES::Debugger</small>
   </li>
   
 
+  <li class="r1 ">
+    <span class='object_link'><a href="SES/Debugger.html#convert_breakpoints-class_method" title="SES::Debugger.convert_breakpoints (method)">convert_breakpoints</a></span>
+    <small>SES::Debugger</small>
+  </li>
+  
+
   <li class="r2 ">
-    <span class='object_link'><a href="SES/Debugger.html#context_string-class_method" title="SES::Debugger.context_string (method)">context_string</a></span>
+    <span class='object_link'><a href="SES/Debugger.html#enabled-class_method" title="SES::Debugger.enabled (method)">enabled</a></span>
     <small>SES::Debugger</small>
   </li>
   
 
   <li class="r1 ">
-    <span class='object_link'><a href="SES/Debugger.html#debug-class_method" title="SES::Debugger.debug (method)">debug</a></span>
-    <small>SES::Debugger</small>
-  </li>
-  
-
-  <li class="r2 ">
     <span class='object_link'><a href="SES/Debugger.html#format-class_method" title="SES::Debugger.format (method)">format</a></span>
     <small>SES::Debugger</small>
   </li>
   
 
+  <li class="r2 ">
+    <span class='object_link'><a href="DataManager.html#init-class_method" title="DataManager.init (method)">init</a></span>
+    <small>DataManager</small>
+  </li>
+  
+
   <li class="r1 ">
-    <span class='object_link'><a href="SES/Debugger.html#script_line-class_method" title="SES::Debugger.script_line (method)">script_line</a></span>
-    <small>SES::Debugger</small>
+    <span class='object_link'><a href="DataManager.html#ses_debugger_dm_init-class_method" title="DataManager.ses_debugger_dm_init (method)">ses_debugger_dm_init</a></span>
+    <small>DataManager</small>
   </li>
   
 
   <li class="r2 ">
-    <span class='object_link'><a href="Scene_Base.html#ses_debugger_sb_upd-instance_method" title="Scene_Base#ses_debugger_sb_upd (method)">#ses_debugger_sb_upd</a></span>
-    <small>Scene_Base</small>
+    <span class='object_link'><a href="Graphics.html#ses_debugger_gfx_update-class_method" title="Graphics.ses_debugger_gfx_update (method)">ses_debugger_gfx_update</a></span>
+    <small>Graphics</small>
   </li>
   
 
@@ -108,14 +124,8 @@
   
 
   <li class="r1 ">
-    <span class='object_link'><a href="Scene_Base.html#update-instance_method" title="Scene_Base#update (method)">#update</a></span>
-    <small>Scene_Base</small>
-  </li>
-  
-
-  <li class="r2 ">
-    <span class='object_link'><a href="Scene_Base.html#update_ses_debugger-instance_method" title="Scene_Base#update_ses_debugger (method)">#update_ses_debugger</a></span>
-    <small>Scene_Base</small>
+    <span class='object_link'><a href="Graphics.html#update-class_method" title="Graphics.update (method)">update</a></span>
+    <small>Graphics</small>
   </li>
   
 

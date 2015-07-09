@@ -86,8 +86,7 @@
 
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
-    
-<h1 id="label-Debugger">Debugger</h1>
+    <h1>Debugger</h1>
 
 <p>Provides a simple debugger with break points, halting of game execution,
 and contextual awareness.</p>
@@ -106,8 +105,7 @@ and contextual awareness.</p>
         <dt id="TRIGGER-constant" class="">TRIGGER =
           <div class="docstring">
   <div class="discussion">
-    
-<p>The Input module constant to use for enabling the debugger.</p>
+    <p>The Input module constant to use for enabling the debugger.</p>
 
 
   </div>
@@ -122,9 +120,8 @@ and contextual awareness.</p>
         <dt id="Lambda-constant" class="">Lambda =
           <div class="docstring">
   <div class="discussion">
-    
-<p>Tracing lambda given to <code>Kernel.set_trace_func</code> to perform
-debugging operations (namely break points).</p>
+    <p>Tracing lambda given to <code>Kernel.set_trace_func</code> to perform debugging
+operations (namely break points).</p>
 
 
   </div>
@@ -134,16 +131,24 @@ debugging operations (namely break points).</p>
 
 </div>
         </dt>
-        <dd><pre class="code"><span class='tlambda'>-&gt;</span><span class='lparen'>(</span><span class='id identifier rubyid_event'>event</span><span class='comma'>,</span> <span class='id identifier rubyid_file'>file</span><span class='comma'>,</span> <span class='id identifier rubyid_line'>line</span><span class='comma'>,</span> <span class='id identifier rubyid_id'>id</span><span class='comma'>,</span> <span class='id identifier rubyid_binding'>binding</span><span class='comma'>,</span> <span class='id identifier rubyid_class_name'>class_name</span><span class='rparen'>)</span> <span class='kw'>do</span>
-  <span class='kw'>return</span> <span class='kw'>unless</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>call</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>c-call</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_type'>type</span><span class='op'>|</span> <span class='id identifier rubyid_event'>event</span> <span class='op'>==</span> <span class='id identifier rubyid_type'>type</span> <span class='rbrace'>}</span>
-  <span class='const'>SES</span><span class='op'>::</span><span class='const'>Debugger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span><span class='id identifier rubyid_file'>file</span><span class='comma'>,</span> <span class='id identifier rubyid_line'>line</span><span class='comma'>,</span> <span class='id identifier rubyid_binding'>binding</span><span class='rparen'>)</span>
+        <dd><pre class="code"><span class='tlambda'>-&gt;</span><span class='lparen'>(</span><span class='id identifier rubyid_event'>event</span><span class='comma'>,</span> <span class='id identifier rubyid_file'>file</span><span class='comma'>,</span> <span class='id identifier rubyid_line'>line</span><span class='comma'>,</span> <span class='id identifier rubyid__'>_</span><span class='comma'>,</span> <span class='id identifier rubyid_binding'>binding</span><span class='comma'>,</span> <span class='id identifier rubyid_klass'>klass</span><span class='rparen'>)</span> <span class='kw'>do</span>
+  <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_event'>event</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>'</span><span class='tstring_content'>line</span><span class='tstring_end'>'</span></span> <span class='op'>&amp;&amp;</span> <span class='ivar'>@breakpoints</span><span class='lbracket'>[</span><span class='id identifier rubyid_klass'>klass</span><span class='rbracket'>]</span> <span class='op'>&amp;&amp;</span>
+    <span class='ivar'>@breakpoints</span><span class='lbracket'>[</span><span class='id identifier rubyid_klass'>klass</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_line'>line</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_filename'>filename</span> <span class='op'>=</span> <span class='id identifier rubyid_file'>file</span><span class='period'>.</span><span class='id identifier rubyid_sub'>sub</span><span class='lparen'>(</span><span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>^{(\d+)}</span><span class='regexp_end'>/</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='gvar'>$RGSS_SCRIPTS</span><span class='lbracket'>[</span><span class='backref'>$1</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='ivar'>@format</span><span class='lbracket'>[</span><span class='symbol'>:start</span><span class='rbracket'>]</span> <span class='op'>%</span> <span class='lbracket'>[</span><span class='id identifier rubyid_filename'>filename</span><span class='comma'>,</span> <span class='id identifier rubyid_line'>line</span><span class='comma'>,</span> <span class='id identifier rubyid_eval'>eval</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>'</span><span class='tstring_content'>self</span><span class='tstring_end'>'</span></span><span class='comma'>,</span> <span class='id identifier rubyid_binding'>binding</span><span class='rparen'>)</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='ivar'>@format</span><span class='lbracket'>[</span><span class='symbol'>:code</span><span class='rbracket'>]</span>  <span class='op'>%</span> <span class='id identifier rubyid_script_line'>script_line</span><span class='lparen'>(</span><span class='id identifier rubyid_file'>file</span><span class='period'>.</span><span class='id identifier rubyid_dup'>dup</span><span class='lbracket'>[</span><span class='int'>1</span><span class='op'>..</span><span class='int'>4</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span><span class='comma'>,</span> <span class='id identifier rubyid_line'>line</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_previous_context'>previous_context</span>     <span class='op'>=</span> <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_context'>context</span>
+  <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_context'>context</span> <span class='op'>=</span> <span class='id identifier rubyid_binding'>binding</span>
+  <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_enabled'>enabled</span> <span class='op'>=</span> <span class='kw'>true</span>
+  <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='ivar'>@format</span><span class='lbracket'>[</span><span class='symbol'>:reset</span><span class='rbracket'>]</span> <span class='op'>%</span> <span class='id identifier rubyid_eval'>eval</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>'</span><span class='tstring_content'>self</span><span class='tstring_end'>'</span></span><span class='comma'>,</span> <span class='id identifier rubyid_previous_context'>previous_context</span><span class='rparen'>)</span>
+  <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_context'>context</span> <span class='op'>=</span> <span class='id identifier rubyid_previous_context'>previous_context</span>
 <span class='kw'>end</span></pre></dd>
       
         <dt id="Description-constant" class="">Description =
           <div class="docstring">
   <div class="discussion">
-    
-<p>Script metadata.</p>
+    <p>Script metadata.</p>
 
 
   </div>
@@ -153,7 +158,7 @@ debugging operations (namely break points).</p>
 
 </div>
         </dt>
-        <dd><pre class="code"><span class='const'>Script</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='symbol'>:Debugger</span><span class='comma'>,</span> <span class='float'>1.3</span><span class='comma'>,</span> <span class='symbol'>:Solistra</span><span class='rparen'>)</span></pre></dd>
+        <dd><pre class="code"><span class='const'>Script</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='symbol'>:Debugger</span><span class='comma'>,</span> <span class='float'>1.4</span><span class='comma'>,</span> <span class='symbol'>:Solistra</span><span class='rparen'>)</span></pre></dd>
       
     </dl>
   
@@ -167,7 +172,7 @@ debugging operations (namely break points).</p>
       <li class="public ">
   <span class="summary_signature">
     
-      <a href="#breakpoints-class_method" title="breakpoints (class method)">+ (Hash{String =&gt; Array&lt;FixNum&gt;}) <strong>breakpoints</strong> </a>
+      <a href="#breakpoints-class_method" title="breakpoints (class method)">+ (Hash{Module =&gt; Array&lt;Fixnum&gt;}) <strong>breakpoints</strong> </a>
     
 
     
@@ -186,8 +191,7 @@ debugging operations (namely break points).</p>
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>Hash of break points.</p>
+    <span class="summary_desc"><div class='inline'><p>Hash of break points; keys are constants, values are an array of line numbers to debug.</p>
 </div></span>
   
 </li>
@@ -196,7 +200,7 @@ debugging operations (namely break points).</p>
       <li class="public ">
   <span class="summary_signature">
     
-      <a href="#code_lines-class_method" title="code_lines (class method)">+ (FixNum) <strong>code_lines</strong> </a>
+      <a href="#code_lines-class_method" title="code_lines (class method)">+ (Fixnum) <strong>code_lines</strong> </a>
     
 
     
@@ -213,8 +217,37 @@ debugging operations (namely break points).</p>
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>The number of lines of code to surround break points with.</p>
+    <span class="summary_desc"><div class='inline'><p>The number of lines of code to surround break points with.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#enabled-class_method" title="enabled (class method)">+ (Boolean) <strong>enabled</strong> </a>
+    
+
+    
+      (also: enabled?)
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether or not the SES Debugger has been enabled.</p>
 </div></span>
   
 </li>
@@ -242,9 +275,7 @@ debugging operations (namely break points).</p>
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>Hash of strings used to format the SES Debugger&#39;s output while using
-the debugger.</p>
+    <span class="summary_desc"><div class='inline'><p>Hash of strings used to format the SES Debugger&#39;s output while using the debugger.</p>
 </div></span>
   
 </li>
@@ -266,9 +297,11 @@ the debugger.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#context_string-class_method" title="context_string (class method)">+ (String) <strong>context_string</strong>(object) </a>
+      <a href="#add-class_method" title="add (class method)">+ (Hash{Module=&gt;Fixnum}) <strong>add</strong>(*points) </a>
     
 
+    
+      (also: &lt;&lt;)
     
   </span>
   
@@ -280,8 +313,7 @@ the debugger.</p>
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>Returns the “context string” for the given context object.</p>
+    <span class="summary_desc"><div class='inline'><p>Dynamically adds a break point to the SES Debugger given as a string representing the desired instance or class method.</p>
 </div></span>
   
 </li>
@@ -290,7 +322,7 @@ the debugger.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#debug-class_method" title="debug (class method)">+ (Binding<sup>?</sup>) <strong>debug</strong>(file, line, binding) </a>
+      <a href="#convert_breakpoints-class_method" title="convert_breakpoints (class method)">+ (void) <strong>convert_breakpoints</strong> </a>
     
 
     
@@ -304,9 +336,7 @@ the debugger.</p>
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>Begins debugging the code at the specified line in the specified file with
-the SES Console set to the given contextual binding.</p>
+    <span class="summary_desc"><div class='inline'><p>Converts the user-configurable array of debugging break points into the hash structure consumed by the debugging process.</p>
 </div></span>
   
 </li>
@@ -315,7 +345,7 @@ the SES Console set to the given contextual binding.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#script_line-class_method" title="script_line (class method)">+ (String) <strong>script_line</strong>(script, line, wrap = @code_lines) </a>
+      <a href="#start-class_method" title="start (class method)">+ (void) <strong>start</strong> </a>
     
 
     
@@ -329,8 +359,7 @@ the SES Console set to the given contextual binding.</p>
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>Generates a stub of code from the given script number.</p>
+    <span class="summary_desc"><div class='inline'><p>Calls <code>Kernel.set_trace_func</code> with <span class='object_link'><a href="#Lambda-constant" title="SES::Debugger::Lambda (constant)">Lambda</a></span> as the tracing block to run.</p>
 </div></span>
   
 </li>
@@ -339,7 +368,7 @@ the SES Console set to the given contextual binding.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#start-class_method" title="start (class method)">+ (Boolean) <strong>start</strong> </a>
+      <a href="#stop-class_method" title="stop (class method)">+ (void) <strong>stop</strong> </a>
     
 
     
@@ -353,34 +382,7 @@ the SES Console set to the given contextual binding.</p>
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>Calls <code>Kernel.set_trace_func</code> with <span class='object_link'><a href="#Lambda-constant" title="SES::Debugger::Lambda (constant)">Lambda</a></span> as
-the tracing block to run.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#stop-class_method" title="stop (class method)">+ (Boolean) <strong>stop</strong> </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'>
-<p>Closes the SES Console, stops all <code>Kernel.set_trace_func</code>
-tracing, then focuses on the RGSS Player.</p>
+    <span class="summary_desc"><div class='inline'><p>Stops all <code>Kernel.set_trace_func</code> tracing, effectively stopping the SES Debugger.</p>
 </div></span>
   
 </li>
@@ -398,7 +400,7 @@ tracing, then focuses on the RGSS Player.</p>
       <div class="method_details first">
   <h3 class="signature first" id="breakpoints-class_method">
   
-    + (<tt>Hash{String =&gt; Array&lt;FixNum&gt;}</tt>) <strong>breakpoints</strong>  <span class="extras">(readonly)</span>
+    + (<tt>Hash{Module =&gt; Array&lt;Fixnum&gt;}</tt>) <strong>breakpoints</strong>  <span class="extras">(readonly)</span>
   
 
   
@@ -406,9 +408,8 @@ tracing, then focuses on the RGSS Player.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    
-<p>Hash of break points. Keys are script names in the Ace Script Editor,
-values are an array of line numbers to debug.</p>
+    <p>Returns hash of break points; keys are
+constants, values are an array of line numbers to debug</p>
 
 
   </div>
@@ -421,9 +422,14 @@ values are an array of line numbers to debug.</p>
     <li>
       
       
-        <span class='type'>(<tt>Hash{String =&gt; Array&lt;FixNum&gt;}</tt>)</span>
+        <span class='type'>(<tt>Hash{Module =&gt; Array&lt;Fixnum&gt;}</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>hash of break points; keys are
+constants, values are an array of line numbers to debug</p>
+</div>
       
     </li>
   
@@ -435,12 +441,12 @@ values are an array of line numbers to debug.</p>
       <pre class="lines">
 
 
-114
-115
-116</pre>
+159
+160
+161</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 114</span>
+      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 159</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_breakpoints'>breakpoints</span>
   <span class='ivar'>@breakpoints</span>
@@ -455,7 +461,7 @@ values are an array of line numbers to debug.</p>
       <div class="method_details ">
   <h3 class="signature " id="code_lines-class_method">
   
-    + (<tt>FixNum</tt>) <strong>code_lines</strong> 
+    + (<tt>Fixnum</tt>) <strong>code_lines</strong> 
   
 
   
@@ -463,8 +469,8 @@ values are an array of line numbers to debug.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    
-<p>The number of lines of code to surround break points with.</p>
+    <p>Returns the number of lines of code to surround break points
+with</p>
 
 
   </div>
@@ -477,9 +483,14 @@ values are an array of line numbers to debug.</p>
     <li>
       
       
-        <span class='type'>(<tt>FixNum</tt>)</span>
+        <span class='type'>(<tt>Fixnum</tt>)</span>
       
       
+      
+        &mdash;
+        <div class='inline'><p>the number of lines of code to surround break points
+with</p>
+</div>
       
     </li>
   
@@ -491,15 +502,78 @@ values are an array of line numbers to debug.</p>
       <pre class="lines">
 
 
-104
-105
-106</pre>
+147
+148
+149</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 104</span>
+      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 147</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_code_lines'>code_lines</span>
   <span class='ivar'>@code_lines</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="enabled-class_method">
+  
+    + (<tt>Boolean</tt>) <strong>enabled</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='enabled?-class_method'>enabled?</span></span>
+    </span>
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns whether or not the SES Debugger has been enabled</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>whether or not the SES Debugger has been enabled</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+150
+151
+152</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 150</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_enabled'>enabled</span>
+  <span class='ivar'>@enabled</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -519,9 +593,8 @@ values are an array of line numbers to debug.</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    
-<p>Hash of strings used to format the SES Debugger&#39;s output while using
-the debugger.</p>
+    <p>Returns hash of strings used to format the SES
+Debugger&#39;s output while using the debugger</p>
 
 
   </div>
@@ -538,6 +611,11 @@ the debugger.</p>
       
       
       
+        &mdash;
+        <div class='inline'><p>hash of strings used to format the SES
+Debugger&#39;s output while using the debugger</p>
+</div>
+      
     </li>
   
 </ul>
@@ -548,12 +626,12 @@ the debugger.</p>
       <pre class="lines">
 
 
-109
-110
-111</pre>
+155
+156
+157</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 109</span>
+      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 155</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_format'>format</span>
   <span class='ivar'>@format</span>
@@ -571,41 +649,52 @@ the debugger.</p>
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="context_string-class_method">
+  <h3 class="signature first" id="add-class_method">
   
-    + (<tt>String</tt>) <strong>context_string</strong>(object) 
+    + (<tt>Hash{Module=&gt;Fixnum}</tt>) <strong>add</strong>(*points) 
   
 
+  
+    <span class="aliases">Also known as:
+    <span class="names"><span id='<<-class_method'>&lt;&lt;</span></span>
+    </span>
   
 
   
 </h3><div class="docstring">
   <div class="discussion">
-    
-<p>Returns the “context string” for the given context object. If the object is
-a class or module, the name of the class or module is returned. If the
-object is an instance, the name of the instance&#39;s class is returned
-along with the hexadecimal object ID representing the individual object.</p>
+    <p>Dynamically adds a break point to the SES Debugger given as a string
+representing the desired instance or class method.</p>
 
 
   </div>
 </div>
 <div class="tags">
-  <p class="tag_title">Parameters:</p>
+  
+  <div class="examples">
+    <p class="tag_title">Examples:</p>
+    
+      
+      <pre class="example code"><code><span class='const'>SES</span><span class='op'>::</span><span class='const'>Debugger</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>'</span><span class='tstring_content'>Scene_Map#start</span><span class='tstring_end'>'</span></span><span class='rparen'>)</span>
+<span class='const'>SES</span><span class='op'>::</span><span class='const'>Debugger</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>'</span><span class='tstring_content'>SceneManager.return</span><span class='tstring_end'>'</span></span></code></pre>
+    
+  </div>
+<p class="tag_title">Parameters:</p>
 <ul class="param">
   
     <li>
       
-        <span class='name'>object</span>
+        <span class='name'>points</span>
       
       
-        <span class='type'>(<tt>Object</tt>)</span>
+        <span class='type'>(<tt>Array&lt;String&gt;</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'>
-<p>the object to generate a context string for</p>
+        <div class='inline'><p>an array of strings representing classes or
+modules and the desired instance or class methods to add break points
+for</p>
 </div>
       
     </li>
@@ -618,13 +707,13 @@ along with the hexadecimal object ID representing the individual object.</p>
     <li>
       
       
-        <span class='type'>(<tt>String</tt>)</span>
+        <span class='type'>(<tt>Hash{Module=&gt;Fixnum}</tt>)</span>
       
       
       
         &mdash;
-        <div class='inline'>
-<p>the appropriate context string</p>
+        <div class='inline'><p>hash of the break points added to the
+debugger</p>
 </div>
       
     </li>
@@ -637,23 +726,35 @@ along with the hexadecimal object ID representing the individual object.</p>
       <pre class="lines">
 
 
-196
-197
-198
-199
-200
-201
-202</pre>
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 196</span>
+      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 214</span>
 
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_context_string'>context_string</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
-  <span class='kw'>if</span> <span class='lbracket'>[</span><span class='const'>Class</span><span class='comma'>,</span> <span class='const'>Module</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_any?'>any?</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_base'>base</span><span class='op'>|</span> <span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span> <span class='op'>==</span> <span class='id identifier rubyid_base'>base</span> <span class='rbrace'>}</span>
-    <span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span>
-  <span class='kw'>else</span>
-    <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span> <span class='kw'>rescue</span> <span class='kw'>nil</span><span class='embexpr_end'>}</span><span class='tstring_content'> 0x</span><span class='embexpr_beg'>#{</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid___id__'>__id__</span> <span class='op'>&lt;&lt;</span> <span class='int'>1</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='lparen'>(</span><span class='int'>16</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_add'>add</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_points'>points</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_return_value'>return_value</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
+  <span class='id identifier rubyid_points'>points</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_point'>point</span><span class='op'>|</span>
+    <span class='id identifier rubyid_klass'>klass</span><span class='comma'>,</span> <span class='id identifier rubyid_method'>method</span> <span class='op'>=</span> <span class='op'>*</span><span class='id identifier rubyid_convert_breakpoint'>convert_breakpoint</span><span class='lparen'>(</span><span class='id identifier rubyid_point'>point</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_breakpoints'>breakpoints</span>   <span class='op'>=</span> <span class='ivar'>@breakpoints</span><span class='lbracket'>[</span><span class='id identifier rubyid_klass'>klass</span><span class='rbracket'>]</span> <span class='op'>||=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+    <span class='id identifier rubyid_line'>line</span>          <span class='op'>=</span> <span class='id identifier rubyid_method'>method</span><span class='period'>.</span><span class='id identifier rubyid_source_location'>source_location</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='op'>+</span> <span class='int'>1</span>
+    <span class='kw'>unless</span> <span class='id identifier rubyid_breakpoints'>breakpoints</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_line'>line</span><span class='rparen'>)</span>
+      <span class='lparen'>(</span><span class='id identifier rubyid_return_value'>return_value</span><span class='lbracket'>[</span><span class='id identifier rubyid_klass'>klass</span><span class='rbracket'>]</span> <span class='op'>||=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='rparen'>)</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_line'>line</span>
+      <span class='id identifier rubyid_breakpoints'>breakpoints</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_line'>line</span>
+    <span class='kw'>end</span>
   <span class='kw'>end</span>
+  <span class='id identifier rubyid_return_value'>return_value</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -661,9 +762,9 @@ along with the hexadecimal object ID representing the individual object.</p>
 </div>
     
       <div class="method_details ">
-  <h3 class="signature " id="debug-class_method">
+  <h3 class="signature " id="convert_breakpoints-class_method">
   
-    + (<tt>Binding</tt><sup>?</sup>) <strong>debug</strong>(file, line, binding) 
+    + (<tt>void</tt>) <strong>convert_breakpoints</strong> 
   
 
   
@@ -674,320 +775,19 @@ along with the hexadecimal object ID representing the individual object.</p>
     
   <div class="note notetag">
     <strong>Note:</strong>
-    <div class='inline'>
-<p>This method is not intended to be called on its own, but as part of
-<span class='object_link'><a href="#Lambda-constant" title="SES::Debugger::Lambda (constant)">Lambda</a></span> via <code>Kernel.set_trace_func</code>.</p>
+    <div class='inline'><p>While this method is publicly available, it is <em>not</em> intended to
+be called by individual users; as such, it should be seen as private.</p>
 </div>
   </div>
 
-
-<p>Begins debugging the code at the specified line in the specified file with
-the SES Console set to the given contextual binding.</p>
+<p class="note returns_void">This method returns an undefined value.</p><p>Converts the user-configurable array of debugging break points into the
+hash structure consumed by the debugging process.</p>
 
 
   </div>
 </div>
 <div class="tags">
   
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Binding</tt>, <tt>nil</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>the reset SES Console context or <code>nil</code> if no debugging session
-was entered</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-169
-170
-171
-172
-173
-174
-175
-176
-177
-178
-179
-180
-181
-182
-183
-184
-185
-186
-187</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 169</span>
-
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span><span class='id identifier rubyid_file'>file</span><span class='comma'>,</span> <span class='id identifier rubyid_line'>line</span><span class='comma'>,</span> <span class='id identifier rubyid_binding'>binding</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_file_number'>file_number</span> <span class='op'>=</span> <span class='id identifier rubyid_file'>file</span><span class='period'>.</span><span class='id identifier rubyid_dup'>dup</span><span class='lbracket'>[</span><span class='int'>1</span><span class='op'>..</span><span class='int'>4</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span>
-  <span class='id identifier rubyid_file'>file</span><span class='period'>.</span><span class='id identifier rubyid_gsub!'>gsub!</span><span class='lparen'>(</span><span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>^{(\d+)}</span><span class='regexp_end'>/</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='gvar'>$RGSS_SCRIPTS</span><span class='lbracket'>[</span><span class='backref'>$1</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
-  <span class='kw'>return</span> <span class='kw'>unless</span> <span class='ivar'>@breakpoints</span><span class='lbracket'>[</span><span class='id identifier rubyid_file'>file</span><span class='rbracket'>]</span>
-  <span class='kw'>if</span> <span class='ivar'>@breakpoints</span><span class='lbracket'>[</span><span class='id identifier rubyid_file'>file</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_line'>line</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_context_string'>context_string</span><span class='lparen'>(</span><span class='id identifier rubyid_eval'>eval</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>self</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_binding'>binding</span><span class='rparen'>)</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_puts'>puts</span> <span class='ivar'>@format</span><span class='lbracket'>[</span><span class='symbol'>:start</span><span class='rbracket'>]</span> <span class='op'>%</span> <span class='lbracket'>[</span><span class='id identifier rubyid_file'>file</span><span class='comma'>,</span> <span class='id identifier rubyid_line'>line</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='rbracket'>]</span>
-    <span class='id identifier rubyid_puts'>puts</span> <span class='ivar'>@format</span><span class='lbracket'>[</span><span class='symbol'>:code</span><span class='rbracket'>]</span>  <span class='op'>%</span> <span class='id identifier rubyid_script_line'>script_line</span><span class='lparen'>(</span><span class='id identifier rubyid_file_number'>file_number</span><span class='comma'>,</span> <span class='id identifier rubyid_line'>line</span><span class='rparen'>)</span>
-    
-    <span class='id identifier rubyid_previous_context'>previous_context</span>     <span class='op'>=</span> <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_context'>context</span>
-    <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_context'>context</span> <span class='op'>=</span> <span class='id identifier rubyid_binding'>binding</span>
-    <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_enabled'>enabled</span> <span class='op'>=</span> <span class='kw'>true</span>
-    <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span>
-    
-    <span class='id identifier rubyid_object'>object</span> <span class='op'>=</span> <span class='id identifier rubyid_context_string'>context_string</span><span class='lparen'>(</span><span class='id identifier rubyid_eval'>eval</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>self</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_previous_context'>previous_context</span><span class='rparen'>)</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_puts'>puts</span> <span class='ivar'>@format</span><span class='lbracket'>[</span><span class='symbol'>:reset</span><span class='rbracket'>]</span> <span class='op'>%</span> <span class='id identifier rubyid_object'>object</span>
-    <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_context'>context</span> <span class='op'>=</span> <span class='id identifier rubyid_previous_context'>previous_context</span>
-  <span class='kw'>end</span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="script_line-class_method">
-  
-    + (<tt>String</tt>) <strong>script_line</strong>(script, line, wrap = @code_lines) 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-<p>Generates a stub of code from the given script number. Includes the given
-line number surrounded by the given number of surrounding lines.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-  
-    <li>
-      
-        <span class='name'>script</span>
-      
-      
-        <span class='type'>(<tt>FixNum</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>the script ID to generate a code stub for</p>
-</div>
-      
-    </li>
-  
-    <li>
-      
-        <span class='name'>line</span>
-      
-      
-        <span class='type'>(<tt>FixNum</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>the target line number</p>
-</div>
-      
-    </li>
-  
-    <li>
-      
-        <span class='name'>wrap</span>
-      
-      
-        <span class='type'>(<tt>FixNum</tt>)</span>
-      
-      
-        <em class="default">(defaults to: <tt>@code_lines</tt>)</em>
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>the number of lines above and below the target to display</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>String</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>the requested code stub with a break point notice on the targeted line</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-213
-214
-215
-216
-217
-218
-219
-220</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 213</span>
-
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_script_line'>script_line</span><span class='lparen'>(</span><span class='id identifier rubyid_script'>script</span><span class='comma'>,</span> <span class='id identifier rubyid_line'>line</span><span class='comma'>,</span> <span class='id identifier rubyid_wrap'>wrap</span> <span class='op'>=</span> <span class='ivar'>@code_lines</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_line'>line</span>  <span class='op'>-=</span> <span class='int'>1</span>
-  <span class='id identifier rubyid_script'>script</span> <span class='op'>=</span> <span class='gvar'>$RGSS_SCRIPTS</span><span class='lbracket'>[</span><span class='id identifier rubyid_script'>script</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_last'>last</span><span class='period'>.</span><span class='id identifier rubyid_force_encoding'>force_encoding</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>utf-8</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>\r\n</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_start'>start</span>  <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_line'>line</span> <span class='op'>-</span> <span class='id identifier rubyid_wrap'>wrap</span> <span class='op'>&lt;</span> <span class='int'>0</span> <span class='op'>?</span> <span class='int'>0</span> <span class='op'>:</span> <span class='id identifier rubyid_line'>line</span> <span class='op'>-</span> <span class='id identifier rubyid_wrap'>wrap</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_stop'>stop</span>   <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_line'>line</span> <span class='op'>+</span> <span class='id identifier rubyid_wrap'>wrap</span> <span class='op'>&gt;</span> <span class='id identifier rubyid_script'>script</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span> <span class='op'>?</span> <span class='id identifier rubyid_script'>script</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span> <span class='op'>-</span> <span class='int'>1</span> <span class='op'>:</span> <span class='id identifier rubyid_line'>line</span> <span class='op'>+</span> <span class='id identifier rubyid_wrap'>wrap</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_script'>script</span><span class='lbracket'>[</span><span class='id identifier rubyid_line'>line</span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='ivar'>@format</span><span class='lbracket'>[</span><span class='symbol'>:breakpoint</span><span class='rbracket'>]</span>
-  <span class='id identifier rubyid_script'>script</span><span class='lbracket'>[</span><span class='id identifier rubyid_start'>start</span><span class='op'>..</span><span class='id identifier rubyid_stop'>stop</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>\r\n</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="start-class_method">
-  
-    + (<tt>Boolean</tt>) <strong>start</strong> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-<p>Calls <code>Kernel.set_trace_func</code> with <span class='object_link'><a href="#Lambda-constant" title="SES::Debugger::Lambda (constant)">Lambda</a></span> as
-the tracing block to run.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p><code>true</code> if started, <code>false</code> otherwise</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-226
-227
-228
-229
-230</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 226</span>
-
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_start'>start</span>
-  <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='ivar'>@breakpoints</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
-  <span class='const'>Kernel</span><span class='period'>.</span><span class='id identifier rubyid_set_trace_func'>set_trace_func</span><span class='lparen'>(</span><span class='const'>Lambda</span><span class='rparen'>)</span>
-  <span class='kw'>true</span>
-<span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="stop-class_method">
-  
-    + (<tt>Boolean</tt>) <strong>stop</strong> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-<p>Closes the SES Console, stops all <code>Kernel.set_trace_func</code>
-tracing, then focuses on the RGSS Player.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Boolean</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p><code>true</code> if stopped, <code>false</code> otherwise</p>
-</div>
-      
-    </li>
-  
-</ul>
 
 </div><table class="source_code">
   <tr>
@@ -1000,18 +800,106 @@ tracing, then focuses on the RGSS Player.</p>
 238
 239
 240
-241
-242</pre>
+241</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 236</span>
 
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_convert_breakpoints'>convert_breakpoints</span>
+  <span class='kw'>return</span> <span class='kw'>unless</span> <span class='ivar'>@breakpoints</span><span class='period'>.</span><span class='id identifier rubyid_kind_of?'>kind_of?</span><span class='lparen'>(</span><span class='const'>Array</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_breakpoints'>breakpoints</span>  <span class='op'>=</span> <span class='ivar'>@breakpoints</span><span class='period'>.</span><span class='id identifier rubyid_dup'>dup</span>
+  <span class='ivar'>@breakpoints</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
+  <span class='id identifier rubyid_breakpoints'>breakpoints</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_method'>method</span><span class='lparen'>(</span><span class='symbol'>:add</span><span class='rparen'>)</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="start-class_method">
+  
+    + (<tt>void</tt>) <strong>start</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p class="note returns_void">This method returns an undefined value.</p><p>Calls <code>Kernel.set_trace_func</code> with <span class='object_link'><a href="#Lambda-constant" title="SES::Debugger::Lambda (constant)">Lambda</a></span> as the tracing
+block to run.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+267
+268
+269
+270
+271</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 267</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_start'>start</span>
+  <span class='ivar'>@enabled</span> <span class='op'>=</span> <span class='kw'>true</span>
+  <span class='const'>Kernel</span><span class='period'>.</span><span class='id identifier rubyid_set_trace_func'>set_trace_func</span><span class='lparen'>(</span><span class='const'>Lambda</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>'</span><span class='tstring_content'>SES Debugger started.</span><span class='tstring_end'>'</span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="stop-class_method">
+  
+    + (<tt>void</tt>) <strong>stop</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p class="note returns_void">This method returns an undefined value.</p><p>Stops all <code>Kernel.set_trace_func</code> tracing, effectively stopping the SES
+Debugger.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+277
+278
+279
+280
+281</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/debugger.rb', line 277</span>
+
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_stop'>stop</span>
+  <span class='ivar'>@enabled</span> <span class='op'>=</span> <span class='kw'>false</span>
   <span class='const'>Kernel</span><span class='period'>.</span><span class='id identifier rubyid_set_trace_func'>set_trace_func</span><span class='lparen'>(</span><span class='kw'>nil</span><span class='rparen'>)</span>
-  <span class='const'>Win32</span><span class='period'>.</span><span class='id identifier rubyid_focus'>focus</span><span class='lparen'>(</span><span class='const'>Win32</span><span class='op'>::</span><span class='const'>HWND</span><span class='op'>::</span><span class='const'>Game</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='const'>SES</span><span class='op'>::</span><span class='const'>Console</span><span class='period'>.</span><span class='id identifier rubyid_enabled'>enabled</span>
-  <span class='kw'>true</span>
-<span class='kw'>rescue</span>
-  <span class='kw'>false</span>
+  <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>'</span><span class='tstring_content'>SES Debugger stopped.</span><span class='tstring_end'>'</span></span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -1023,9 +911,9 @@ tracing, then focuses on the RGSS Player.</p>
 </div>
 
     <div id="footer">
-  Generated on Mon Jul 14 18:06:12 2014 by
+  Generated on Wed Jul  8 22:28:09 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.8.7.4 (ruby-2.1.2).
+  0.8.7.6 (ruby-1.9.3).
 </div>
 
   </body>
